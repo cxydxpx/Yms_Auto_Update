@@ -9,17 +9,12 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.text.Html;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.alibaba.fastjson.JSON;
 import com.example.apen.yms_auto_update.R;
 import com.example.apen.yms_auto_update.bean.AutoUpdateCallBean;
-import com.zhy.http.okhttp.callback.StringCallback;
 
 import java.io.IOException;
-
-import okhttp3.Call;
-import okhttp3.Response;
 
 /**
  * Created by APEN on 2017/3/26.
@@ -52,7 +47,6 @@ public class CheckUpdateTask extends AsyncTask<Void, Void, String> {
     @Override
     protected String doInBackground(Void... params) {
         String str = null;
-
         try {
             str = HttpUtils.getRequest(url).body().string();
         } catch (IOException e) {
@@ -142,4 +136,6 @@ public class CheckUpdateTask extends AsyncTask<Void, Void, String> {
     private static boolean isContextValid(Context context) {
         return context instanceof Activity && !((Activity) context).isFinishing();
     }
+
+
 }

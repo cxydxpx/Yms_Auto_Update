@@ -1,5 +1,5 @@
 apply plugin: 'com.android.application'
-
+apply plugin: 'com.neenbedankt.android-apt'
 android {
     compileSdkVersion 25
     buildToolsVersion "25.0.2"
@@ -10,6 +10,13 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+//        bugly自动更新配置
+        ndk {
+            //设置支持的SO库架构
+            abiFilters 'armeabi' //, 'x86', 'armeabi-v7a', 'x86_64', 'arm64-v8a'
+        }
+
     }
     buildTypes {
         release {
@@ -37,5 +44,8 @@ dependencies {
     compile 'com.zhy:okhttputils:2.6.2'
 //    json解析
     compile 'com.alibaba:fastjson:1.1.56.android'
+
+    apt 'com.zhy:mpermission-compiler:1.0.0'
+    compile 'com.zhy:mpermission-api:1.0.0'
 
 }

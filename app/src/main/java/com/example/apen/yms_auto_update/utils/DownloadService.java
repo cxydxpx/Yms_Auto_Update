@@ -2,13 +2,16 @@ package com.example.apen.yms_auto_update.utils;
 
 import android.app.IntentService;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationCompat.Builder;
+import android.support.v4.content.FileProvider;
 import android.util.Log;
+import android.webkit.MimeTypeMap;
+import android.widget.Toast;
 
 import com.example.apen.yms_auto_update.R;
 
@@ -114,26 +117,50 @@ public class DownloadService extends IntentService {
         //"正在下载:" + progress + "%"
         mBuilder.setContentText(this.getString(R.string.android_auto_update_download_progress, progress)).setProgress(100, progress, false);
         //setContentInent如果不设置在4.0+上没有问题，在4.0以下会报异常
-        PendingIntent pendingintent = PendingIntent.getActivity(this, 0, new Intent(), PendingIntent.FLAG_CANCEL_CURRENT);
-        mBuilder.setContentIntent(pendingintent);
+//        PendingIntent pendingintent = PendingIntent.getActivity(this, 0, new Intent(), PendingIntent.FLAG_CANCEL_CURRENT);
+//        mBuilder.setContentIntent(pendingintent);
         mNotifyManager.notify(NOTIFICATION_ID, mBuilder.build());
     }
 
 
     private void installAPk(File apkFile) {
+//        Intent intent = new Intent(Intent.ACTION_VIEW);
+//        //如果没有设置SDCard写权限，或者没有sdcard,apk文件保存在内存中，需要授予权限才能安装
+//        try {
+//            String[] command = {"chmod", "777", apkFile.toString()};
+//            ProcessBuilder builder = new ProcessBuilder(command);
+//            builder.start();
+//        } catch (IOException ignored) {
+//        }
+//        intent.setDataAndType(Uri.fromFile(apkFile), "application/vnd.android.package-archive");
+//
+//        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//        startActivity(intent);
+
         Intent intent = new Intent(Intent.ACTION_VIEW);
-        //如果没有设置SDCard写权限，或者没有sdcard,apk文件保存在内存中，需要授予权限才能安装
-        try {
-            String[] command = {"chmod", "777", apkFile.toString()};
-            ProcessBuilder builder = new ProcessBuilder(command);
-            builder.start();
-        } catch (IOException ignored) {
-        }
-        intent.setDataAndType(Uri.fromFile(apkFile), "application/vnd.android.package-archive");
-
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(intent);
+        if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.N){
+            Uri uriForFile = FileProvider.getUriForFile(this, this.getApplicationContext().getPackageName() + ".provider", apkFile);
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            intent.setDataAndType(uriForFile, this.getContentResolver().getType(uriForFile));
+        }else{
+            intent.setDataAndType(Uri.fromFile(apkFile), getMIMEType(apkFile));
+        }
+        try {
+            startActivity(intent);
+        } catch (Exception var5) {
+            var5.printStackTrace();
+            Toast.makeText(this, "没有找到打开此类文件的程序", Toast.LENGTH_SHORT).show();
+        }
 
+    }
+
+    public String getMIMEType(File var0) {
+        String var1 = "";
+        String var2 = var0.getName();
+        String var3 = var2.substring(var2.lastIndexOf(".") + 1, var2.length()).toLowerCase();
+        var1 = MimeTypeMap.getSingleton().getMimeTypeFromExtension(var3);
+        return var1;
     }
 
 }
